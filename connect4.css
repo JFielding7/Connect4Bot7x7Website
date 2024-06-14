@@ -1,0 +1,24 @@
+h1 {
+    text-align: center;
+    font-size: 5vh;
+}
+
+#board {
+    width: 70vh;
+    height: 70vh;
+    margin: 10vh auto;
+    position: relative;
+}
+
+.col {
+    width: 10vh;
+    height: 70vh;
+    position: absolute;
+}
+
+.cell {
+    width: 10vh;
+    height: 10vh;
+    position: absolute;
+    background: radial-gradient(circle at center center, transparent, transparent 4vh, blue 1vh);
+}
