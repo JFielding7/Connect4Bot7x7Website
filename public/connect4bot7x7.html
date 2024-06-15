@@ -1,13 +1,13 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
-<link rel="stylesheet" type="text/css" href="connect4.css" />
+<head>
+  <title>Connect 4 Bot 7x7</title>
+  <link rel="stylesheet" type="text/css" href="connect4bot7x7.css">
+</head>
 
 <body>
-  <title>Connect 4 Bot 7x7</title>
-
-  <h1>7x7 Connect 4 Bot</h1>
+  <h1 style='text-align: center'>7x7 Connect 4 Bot</h1>
 
   <div id = "board">
     <script>
@@ -17,7 +17,13 @@
 
         const column = document.createElement("div");
         column.innerHTML = `<div class='col' style='left: ${100 / COLS * c}%;'></div>`;
-        column.onclick = () => console.log(`clicked column ${c}`);
+        column.onclick = async e => {
+          e.preventDefault();
+          console.log(`clicked column ${c}`);
+          const res = await fetch(`http://localhost:7000/col?move=${c}`, {method: "GET"});
+          const data = await res.json();
+          console.log(data.col);
+        }
         board.appendChild(column);
 
         for (let r = 0; r < ROWS; r++) {
@@ -29,8 +35,7 @@
     </script>
   </div>
 
-  <p>Connect 4</p>
-
+  <span class="piece"></span>
 </body>
 
 </html>
