@@ -4,6 +4,7 @@
 <head>
   <title>Connect 4 Bot 7x7</title>
   <link rel="stylesheet" type="text/css" href="connect4bot7x7.css">
+  <script src="events.js"></script>
 </head>
 
 <body>
@@ -11,7 +12,7 @@
 
   <div id = "board">
     <script>
-      const URL = "http://localhost:7000/";
+      // const URL = "http://localhost:7000/";
       const ROWS = 7, COLS = 7;
       const board = document.getElementById("board");
       for (let c = 0; c < COLS; c++) {
@@ -23,7 +24,7 @@
           e.preventDefault();
           const res = await fetch(`${URL}move?col=${c}`, {method: "GET"});
           const data = await res.json();
-          console.log(data.col);
+          console.log(data.player_move);
         };
 
         column.onmouseenter = async e => {
@@ -45,8 +46,8 @@
   </div>
 
   <div class="options-container">
-    <button class="option">Go First</button>
-    <button class="option">Go Second</button>
+    <button class="option" onclick="send_start_request('go-first')">Go First</button>
+    <button class="option" onclick="send_start_request('go-second')">Go Second</button>
   </div>
 
   <div class="options-container" style="display: none">
