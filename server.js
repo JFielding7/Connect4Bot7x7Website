@@ -14,13 +14,25 @@ server.get('', (req, res) => {
 });
 
 server.get('/move', (req, res) => {
-    const player_move = parseInt(req.query.col);
-    if (isNaN(player_move) || curr_game == null || !curr_game.make_player_move(player_move)) {
-        res.status(200).json({player_move: null, com_move: null});
-    }
+    let col = parseInt(req.query.col);
+    if (isNaN(col) || curr_game == null) res.status(200).json({row: null, col: null});
     else {
-        res.status(200).json({player_move: player_move, com_move: curr_game.make_computer_move()});
+        const row = curr_game.lowest_empty_slot(col);
+        if (row === MAX_HEIGHT) res.status(200).json({row: null, col: null});
+        else {
+            curr_game.make_player_move(col);
+            res.status(200).json({row: row, col: col});
+        }
     }
+});
+
+server.get('/computer-move', (req, res) => {
+    let row = null, col = null;
+    if (curr_game != null && curr_game.isComputerTurn) {
+        col = curr_game.make_computer_move();
+        row = curr_game.lowest_empty_slot(col) - 1;
+    }
+    res.status(200).json({row: row, col: col});
 });
 
 server.get('/hover', (req, res) => {
@@ -39,7 +51,8 @@ server.get('/go-first', (req, res) => {
 
 server.get('/go-second', (req, res) => {
     curr_game = new Game(true);
-    res.status(200).json({com_move: curr_game.make_computer_move()});
+    res.status(200).json({started: true});
+    // res.status(200).json({com_move: curr_game.make_computer_move()});
 });
 
 server.get('/resign', (req, res) => {
@@ -91,8 +104,8 @@ Game.prototype.game_state = function () {
 }
 
 Game.prototype.make_computer_move = function () {
-    let col = 0; //get column from c++ program
-    const move = this.heightMap & (COL_MASK << (col << 3));
+    let col = ZERO; //get column from c++ program
+    const move = this.heightMap & (COL_MASK << (col << BigInt(3)));
     this.computerPieces |= move;
     this.heightMap += move;
     this.movesMade++;
@@ -102,7 +115,7 @@ Game.prototype.make_computer_move = function () {
 
 Game.prototype.make_player_move = function (col) {
     col = BigInt(col);
-    const move = this.heightMap & (COL_MASK << (col << 3));
+    const move = this.heightMap & (COL_MASK << (col << BigInt(3)));
     if (this.isComputerTurn || (move & IS_LEGAL) === ZERO) return false;
     this.playerPieces |= move;
     this.heightMap += move;

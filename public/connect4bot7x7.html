@@ -24,6 +24,16 @@
           const res = await fetch(`${URL}move?col=${c}`, {method: "GET"});
           const data = await res.json();
           console.log(data);
+
+          const animation = document.createElement("style");
+          animation.setAttribute("type", "text/css");
+          animation.innerHTML = `@keyframes drop { 100% {top: ${75.75 - data.row * 10}vh} }`;
+
+          const piece = document.createElement("span");
+          piece.className = "piece";
+          piece.setAttribute("style", "animation-name: drop");
+          piece.appendChild(animation);
+          document.body.appendChild(piece);
         };
 
         column.onmouseenter = async e => {
@@ -53,7 +63,7 @@
     <button class="option" onclick="alert('Resigned')">Resign</button>
   </div>
 
-  <span class="piece"></span>
+<!--  <span class="piece"></span>-->
 </body>
 
 </html>
