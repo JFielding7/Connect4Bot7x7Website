@@ -30,17 +30,9 @@ h1 {
     width: 8.5vh;
     height: 8.5vh;
     position: absolute;
-    left: calc(50% - 24.25vh);
-    top: 5.75vh;
     border-radius: 50%;
-    background: red;
-    animation-name: piece_drop;
     animation-duration: 0.5s;
     animation-fill-mode: both;
-}
-
-@keyframes piece_drop {
-    100% {top: 5.75vh}
 }
 
 .options-container {

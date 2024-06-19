@@ -18,30 +18,17 @@
 
         const column = document.createElement("div");
         column.innerHTML = `<div class='col' style='left: ${100 / COLS * c}%;'></div>`;
+        column.col_num = c;
 
-        column.onclick = async e => {
-          e.preventDefault();
-          const res = await fetch(`${URL}move?col=${c}`, {method: "GET"});
-          const data = await res.json();
-          console.log(data);
-
-          const animation = document.createElement("style");
-          animation.setAttribute("type", "text/css");
-          animation.innerHTML = `@keyframes drop { 100% {top: ${75.75 - data.row * 10}vh} }`;
-
-          const piece = document.createElement("span");
-          piece.className = "piece";
-          piece.setAttribute("style", "animation-name: drop");
-          piece.appendChild(animation);
-          document.body.appendChild(piece);
-        };
-
-        column.onmouseenter = async e => {
-          e.preventDefault();
-          const res = await fetch(`${URL}hover?col=${c}`, {method: "GET"});
-          const data = await res.json();
-          console.log(`Hovering over ${data.col} ${data.empty_slot}`);
-        };
+        column.onclick = e => send_move_request(c, e);
+        column.onmouseenter = e => {
+          column.mouse_on = true;
+          send_hover_request(c, e);
+        }
+        column.onmouseleave = () => {
+          column.mouse_on = false;
+          document.getElementById("move_marker").style.display = "none";
+        }
 
         board.appendChild(column);
 
@@ -54,16 +41,16 @@
     </script>
   </div>
 
-  <div class="options-container">
+  <div id="start-options" class="options-container">
     <button class="option" onclick="send_start_request('go-first')">Go First</button>
     <button class="option" onclick="send_start_request('go-second')">Go Second</button>
   </div>
 
-  <div class="options-container" style="display: none">
-    <button class="option" onclick="alert('Resigned')">Resign</button>
+  <div id="resign-option" class="options-container" style="display: none">
+    <button class="option" onclick="send_resign_request()">Resign</button>
   </div>
 
-<!--  <span class="piece"></span>-->
+  <span id="move_marker" class="piece" style="opacity: .375; display: none"></span>
 </body>
 
 </html>
