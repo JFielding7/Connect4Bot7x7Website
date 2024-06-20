@@ -1,3 +1,6 @@
+import child_process from "child_process";
+const execSync = child_process.execSync;
+
 export const DRAW = 0;
 export const WIN = 1;
 export const NOT_OVER = 2;
@@ -5,7 +8,7 @@ export const NOT_OVER = 2;
 export const MAX_MOVES = 49;
 export const COL_MASK = BigInt("0b11111111");
 export const IS_LEGAL = BigInt("0b01111111011111110111111101111111011111110111111101111111");
-export const MAX_HEIGHT = 7;
+export const MAX_COL_HEIGHT = 7;
 
 export const ZERO = BigInt(0);
 export const ONE = BigInt(1);
@@ -18,39 +21,53 @@ export function Game(comTurn) {
     this.movesMade = 0;
 }
 
-Game.prototype.computer_won = function () {
+Game.prototype.find_computer_win = function () {
     for (let i = 1; i < 10; i += Math.floor(1 / i) * 5 + 1) {
         let connections = BigInt(this.computerPieces);
         for (let j = 0; j < 3; j++) connections = connections & (connections >> BigInt(i));
-        if (connections !== ZERO) return true;
+        if (connections !== ZERO) {
+            let start = 0;
+            while ((connections & ONE) === ZERO) {
+                connections >>= ONE;
+                start++;
+            }
+            return [start, start + i, start + 2 * i, start + 3 * i];
+        }
     }
-    return false;
 }
 
-Game.prototype.game_state = function () {
-    if (this.computer_won()) return WIN;
-    return this.movesMade === MAX_MOVES ? DRAW : NOT_OVER;
+Game.prototype.game_result = function () {
+    const computer_win = this.find_computer_win();
+    if (computer_win != null && computer_win.length) return computer_win;
+    return this.movesMade === MAX_MOVES ? [] : undefined;
 }
 
 Game.prototype.make_computer_move = function () {
-    let col = 0; //get column from c++ program
+    const col = parseInt(execSync(`./c4 ${this.computerPieces} ${this.playerPieces} ${this.heightMap} ${this.movesMade}`, {encoding: "utf-8"}));
+    const row = this.col_height(col);
+    
     const move = this.heightMap & (COL_MASK << (BigInt(col) << BigInt(3)));
     this.computerPieces |= move;
     this.heightMap += move;
     this.movesMade++;
     this.isComputerTurn = false;
-    return col;
+    
+    return {row: row, col: col, result: this.game_result()};
 }
 
 Game.prototype.make_player_move = function (col) {
-    col = BigInt(col);
-    const move = this.heightMap & (COL_MASK << (col << BigInt(3)));
-    if (this.isComputerTurn || (move & IS_LEGAL) === ZERO) return false;
-    this.playerPieces |= move;
-    this.heightMap += move;
+    const row = this.col_height(col);
+    const row_bit = this.heightMap & (COL_MASK << (BigInt(col) << BigInt(3)));
+
+    if (col < 0 || col >= MAX_COL_HEIGHT || row === MAX_COL_HEIGHT ||this.isComputerTurn)
+        return {row: undefined, col: undefined, result: undefined};
+
+    this.playerPieces |= row_bit;
+    this.heightMap += row_bit;
     this.movesMade++;
     this.isComputerTurn = true;
-    return true;
+    
+    return {row: row, col: col, result: this.game_result()};
 }
 
 Game.prototype.col_height = function (col) {

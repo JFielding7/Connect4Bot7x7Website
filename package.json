@@ -1,0 +1,19 @@
+{
+  "name": "connect4bot7x7website",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JFielding7/Connect4Bot7x7Website.git"
+  },
+  "private": true,
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}

@@ -2,55 +2,54 @@
 <html lang="en">
 
 <head>
-  <title>Connect 4 Bot 7x7</title>
-  <link rel="stylesheet" type="text/css" href="connect4bot7x7.css">
-  <script src="events.js"></script>
+    <title>Connect 4 Bot 7x7</title>
+    <link rel="stylesheet" type="text/css" href="connect4bot7x7.css">
+    <script src="controller.js"></script>
 </head>
 
 <body>
-  <h1 style='text-align: center'>7x7 Connect 4 Bot</h1>
+<h1 style='text-align: center'>7x7 Connect 4 Bot</h1>
 
-  <div id = "board">
+<div id="board">
     <script>
-      const ROWS = 7, COLS = 7;
-      const board = document.getElementById("board");
-      for (let c = 0; c < COLS; c++) {
+        const board = document.getElementById("board");
+        for (let c = 0; c < COLS; c++) {
 
-        const column = document.createElement("div");
-        column.innerHTML = `<div class='col' style='left: ${100 / COLS * c}%;'></div>`;
-        column.col_num = c;
+            const column = document.createElement("div");
+            column.innerHTML = `<div class='col' style='left: ${100 / COLS * c}%;'></div>`;
+            column.col_num = c;
 
-        column.onclick = e => send_move_request(c, e);
-        column.onmouseenter = e => {
-          column.mouse_on = true;
-          send_hover_request(c, e);
+            column.onclick = e => send_move_request(c, e);
+            column.onmouseenter = e => {
+                column.mouse_on = true;
+                send_hover_request(c, e);
+            }
+            column.onmouseleave = () => {
+                column.mouse_on = false;
+                document.getElementById("move_marker").style.display = "none";
+            }
+
+            board.appendChild(column);
+
+            for (let r = 0; r < ROWS; r++) {
+                const cell = document.createElement("span");
+                cell.innerHTML = `<span class='cell' style='left: ${100 / COLS * c}%; top: ${100 / ROWS * r}%'></span>`;
+                column.appendChild(cell);
+            }
         }
-        column.onmouseleave = () => {
-          column.mouse_on = false;
-          document.getElementById("move_marker").style.display = "none";
-        }
-
-        board.appendChild(column);
-
-        for (let r = 0; r < ROWS; r++) {
-          const cell = document.createElement("span");
-          cell.innerHTML = `<span class='cell' style='left: ${100 / COLS * c}%; top: ${100 / ROWS * r}%'></span>`;
-          column.appendChild(cell);
-        }
-      }
     </script>
-  </div>
+</div>
 
-  <div id="start-options" class="options-container">
+<div id="start-options" class="options-container">
     <button class="option" onclick="send_start_request('go-first')">Go First</button>
     <button class="option" onclick="send_start_request('go-second')">Go Second</button>
-  </div>
+</div>
 
-  <div id="resign-option" class="options-container" style="display: none">
+<div id="resign-option" class="options-container" style="display: none">
     <button class="option" onclick="send_resign_request()">Resign</button>
-  </div>
+</div>
 
-  <span id="move_marker" class="piece" style="opacity: .375; display: none"></span>
+<span id="move_marker" class="piece" style="opacity: .375; display: none"></span>
 </body>
 
 </html>
