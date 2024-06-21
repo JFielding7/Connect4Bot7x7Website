@@ -166,7 +166,7 @@ long evaluate_position(grid curr_pieces, grid opp_pieces, grid height_map, int m
             grid next_state = opp_pieces | updated_height_map;
 
             if (moves_made < BEGINNING_GAME_DEPTH) {
-                alpha = max(alpha, get_bound(next_state, upper_bound_database, BEST_EVAL));
+                alpha = max(alpha, -get_bound(next_state, upper_bound_database, BEST_EVAL));
                 if (upper_bound_cache.count(next_state)) alpha = max(alpha, (long) -upper_bound_cache.at(next_state));
             }
             else {

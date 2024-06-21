@@ -52,6 +52,7 @@ server.get('/hover', (req, res) => {
     }
 });
 
+// think about maybe changing the game code, can only have 1 tab, also have to figure out how to end games when user leaves tab
 server.get('/go-first', (req, res) => {
     curr_games[req.ip] = new Game(false);
     res.status(200).json({started: true});
