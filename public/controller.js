@@ -27,7 +27,6 @@ function set_up_game_start(player_starts) {
     document.getElementById("move_marker").style.background = player_color;
     document.getElementById("start-options").style.display = "none";
     document.getElementById("resign-option").style.display = "inline";
-    document.getElementById("column-labels").style.display = "flex";
     document.getElementById("move-log").children[0].innerText = "0. Starting Position";
 }
 
@@ -44,7 +43,6 @@ async function send_start_request(order) {
 
 async function send_resign_request() {
     await (await fetch(`${URL}resign`, {method: "GET"})).json();
-    document.getElementById("column-labels").style.display = "none";
     document.getElementById("resign-option").style.display = "none";
     document.getElementById("start-options").style.display = "inline";
     document.getElementById("result-message").innerText = "Computer Wins By Resignation!"
@@ -106,7 +104,6 @@ function show_result(winning_cells) {
     if (winning_pieces.length) cycle_through_winning_pieces(winning_pieces);
 
     document.getElementById("result-message").innerText = winning_cells.length ? "Computer Wins!" : "Draw!";
-    document.getElementById("column-labels").style.display = "none";
     document.getElementById("resign-option").style.display = "none";
     document.getElementById("start-options").style.display = "inline";
 }

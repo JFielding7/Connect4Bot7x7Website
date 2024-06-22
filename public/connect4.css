@@ -48,16 +48,18 @@ h1 {
     width: 70vh;
     height: 12vh;
     position: absolute;
-    top: 85vh;
+    top: 87vh;
     left: calc(50% - 35vh);
     text-align: center;
     padding: 0 0 0 0;
+    z-index: 1;
 }
 
 #resign-option {
     position: absolute;
-    top: 85vh;
-    left: calc(50% + 37vh);
+    top: 87vh;
+    left: calc(50% - 15vh);
+    z-index: 1;
 }
 
 #move-log {
@@ -81,6 +83,6 @@ h1 {
 .column-label {
     font-size: 4vh;
     text-align: center;
-    margin-top: 2vh;
+    /*margin-top: 0vh;*/
     position: relative;
 }

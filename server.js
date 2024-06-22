@@ -1,18 +1,12 @@
 import express from "express";
 import {Game, MAX_COL_HEIGHT} from "./game.js";
-import path from 'path';
 
-const __dirname = path.resolve();
 const server = express();
 const PORT = 7000;
 
 server.use(express.static("public"));
 
 const curr_games = {};
-
-server.get("", (req, res) => {
-    res.sendFile(`${__dirname}/public/connect4bot7x7.html`);
-});
 
 server.get("/game-state", (req, res) => {
     const curr_game = curr_games[req.ip];
