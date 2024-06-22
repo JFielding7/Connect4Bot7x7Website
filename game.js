@@ -1,14 +1,11 @@
 import child_process from "child_process";
 const execSync = child_process.execSync;
 
-export const DRAW = 0;
-export const WIN = 1;
-export const NOT_OVER = 2;
-
-export const MAX_MOVES = 49;
+const MAX_MOVES = 49;
 export const COL_MASK = BigInt("0b11111111");
-export const IS_LEGAL = BigInt("0b01111111011111110111111101111111011111110111111101111111");
+// export const IS_LEGAL = BigInt("0b01111111011111110111111101111111011111110111111101111111");
 export const MAX_COL_HEIGHT = 7;
+export const COLS = 7;
 
 export const ZERO = BigInt(0);
 export const ONE = BigInt(1);
@@ -19,6 +16,7 @@ export function Game(comTurn) {
     this.heightMap = BigInt("0b00000001000000010000000100000001000000010000000100000001");
     this.isComputerTurn = comTurn;
     this.movesMade = 0;
+    this.moves = [];
 }
 
 Game.prototype.find_computer_win = function () {
@@ -45,28 +43,30 @@ Game.prototype.game_result = function () {
 Game.prototype.make_computer_move = function () {
     const col = parseInt(execSync(`./c4 ${this.computerPieces} ${this.playerPieces} ${this.heightMap} ${this.movesMade}`, {encoding: "utf-8"}));
     const row = this.col_height(col);
+    this.moves.push({row: row, col: col});
     
     const move = this.heightMap & (COL_MASK << (BigInt(col) << BigInt(3)));
     this.computerPieces |= move;
     this.heightMap += move;
     this.movesMade++;
     this.isComputerTurn = false;
-    
     return {row: row, col: col, result: this.game_result()};
 }
 
 Game.prototype.make_player_move = function (col) {
-    const row = this.col_height(col);
-    const row_bit = this.heightMap & (COL_MASK << (BigInt(col) << BigInt(3)));
-
-    if (col < 0 || col >= MAX_COL_HEIGHT || row === MAX_COL_HEIGHT ||this.isComputerTurn)
+    if (col < 0 || col >= COLS || this.isComputerTurn)
         return {row: undefined, col: undefined, result: undefined};
 
+    const row = this.col_height(col);
+    if (row === MAX_COL_HEIGHT)
+        return {row: undefined, col: undefined, result: undefined};
+
+    this.moves.push({row: row, col: col});
+    const row_bit = this.heightMap & (COL_MASK << (BigInt(col) << BigInt(3)));
     this.playerPieces |= row_bit;
     this.heightMap += row_bit;
     this.movesMade++;
     this.isComputerTurn = true;
-    
     return {row: row, col: col, result: this.game_result()};
 }
 

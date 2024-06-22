@@ -1,37 +1,53 @@
 const URL = "http://localhost:7000/";
 const ROWS = 7, COLS = 7;
 const FADED = ".25";
+const A_CODE = 65;
 
 let player_color, computer_color;
+let moves_made = 0;
+
+async function send_game_state_request() {
+    const res = await (await fetch(`${URL}game-state`, {method: "GET"})).json();
+    if (res.moves != null) {
+        set_up_game_start(res.player_starts);
+        const colors = ['red', 'yellow'];
+        for (const [i, move] of res.moves.entries()) {
+            make_move(move, colors[i & 1]);
+        }
+    }
+}
+
+function set_up_game_start(player_starts) {
+    player_color = "yellow";
+    computer_color = "red";
+    if (player_starts) {
+        player_color = "red";
+        computer_color = "yellow";
+    }
+    document.getElementById("move_marker").style.background = player_color;
+    document.getElementById("start-options").style.display = "none";
+    document.getElementById("resign-option").style.display = "inline";
+    document.getElementById("column-labels").style.display = "flex";
+    document.getElementById("move-log").children[0].innerText = "0. Starting Position";
+}
 
 async function send_start_request(order) {
-    const res = await fetch(`${URL}${order}`, {method: "GET"});
-    const data = await res.json();
-
-    if (data.started) {
-        document.getElementById("start-options").style.display = "none";
-        document.getElementById("resign-option").style.display = "inline";
+    const res = await (await fetch(`${URL}${order}`, {method: "GET"})).json();
+    if (res.started) {
+        moves_made = 0;
         document.getElementById("result-message").innerText = "";
         [...document.getElementsByName("game-piece")].forEach(piece => piece.remove());
-
-        player_color = "yellow";
-        computer_color = "red";
-        if (order === 'go-first') {
-            player_color = "red";
-            computer_color = "yellow";
-        }
-        document.getElementById("move_marker").style.background = player_color;
+        set_up_game_start(order === 'go-first');
+        if (res.row != null) make_move(res, computer_color);
     }
-    if (data.row != null) make_move(data, computer_color);
 }
 
 async function send_resign_request() {
-    const res = await fetch(`${URL}resign`, {method: "GET"});
-    await res.json();
-
-    document.getElementById("start-options").style.display = "inline";
+    await (await fetch(`${URL}resign`, {method: "GET"})).json();
+    document.getElementById("column-labels").style.display = "none";
     document.getElementById("resign-option").style.display = "none";
-    [...document.getElementsByName("game-piece")].forEach(piece => piece.remove());
+    document.getElementById("start-options").style.display = "inline";
+    document.getElementById("result-message").innerText = "Computer Wins By Resignation!"
 }
 
 function cycle_through_winning_pieces(winning_pieces) {
@@ -90,13 +106,24 @@ function show_result(winning_cells) {
     if (winning_pieces.length) cycle_through_winning_pieces(winning_pieces);
 
     document.getElementById("result-message").innerText = winning_cells.length ? "Computer Wins!" : "Draw!";
+    document.getElementById("column-labels").style.display = "none";
     document.getElementById("resign-option").style.display = "none";
     document.getElementById("start-options").style.display = "inline";
 }
 
-function make_move(move, color) {
-    const vertical_pos = `${75.75 - move.row * 10}vh`
+function update_move_log(col) {
+    moves_made++;
+    let move_str;
+    if (moves_made & 1)
+        move_str = `\n${moves_made + 1 >> 1}.${moves_made < 18 ? '  ' : ' '}${String.fromCharCode(col + A_CODE)}`;
+    else move_str = `    ${String.fromCharCode(col + A_CODE)}`;
+    document.getElementById("move-log").children[0].innerText += move_str;
+}
 
+function make_move(move, color) {
+    update_move_log(move.col);
+
+    const vertical_pos = `${75.75 - move.row * 10}vh`
     const piece = document.createElement("span");
     piece.cell = move.col * (ROWS + 1) + move.row;
     piece.className = "piece";
@@ -115,9 +142,7 @@ function make_move(move, color) {
     document.body.appendChild(piece);
 }
 
-async function send_move_request(col, e) {
-    e.preventDefault();
-
+async function send_move_request(col) {
     const player_move = await (await fetch(`${URL}move?col=${col}`, {method: "GET"})).json();
     if (player_move.row != null) {
         document.getElementById("move_marker").style.display = "none";
@@ -125,7 +150,6 @@ async function send_move_request(col, e) {
     }
 
     const computer_move = await (await fetch(`${URL}computer-move`)).json();
-
     if (computer_move.row != null) {
         make_move(computer_move, computer_color);
         for (const column of document.getElementById("board").getElementsByTagName("div")) {
@@ -134,9 +158,7 @@ async function send_move_request(col, e) {
     }
 }
 
-async function send_hover_request(col, e) {
-    if (e != null) e.preventDefault();
-
+async function send_hover_request(col) {
     const res = await (await fetch(`${URL}hover?col=${col}`, {method: "GET"})).json();
     if (res.row != null) {
         const move_marker = document.getElementById("move_marker");

@@ -2,12 +2,12 @@
 <html lang="en">
 
 <head>
-    <title>Connect 4 Bot 7x7</title>
+    <title>7x7 Connect 4 Bot</title>
     <link rel="stylesheet" type="text/css" href="connect4bot7x7.css">
     <script src="controller.js"></script>
 </head>
 
-<body>
+<body onload="send_game_state_request()">
 
 <h1>7x7 Connect 4 Bot</h1>
 
@@ -22,10 +22,10 @@
             column.innerHTML = `<div class='col' style='left: ${100 / COLS * c}%;'></div>`;
             column.col_num = c;
 
-            column.onclick = e => send_move_request(c, e);
+            column.onclick = e => send_move_request(c);
             column.onmouseenter = e => {
                 column.mouse_on = true;
-                send_hover_request(c, e);
+                send_hover_request(c);
             }
             column.onmouseleave = () => {
                 column.mouse_on = false;
@@ -43,16 +43,27 @@
     </script>
 </div>
 
-<div id="start-options" class="options-container">
+<div id="start-options">
     <button class="option" onclick="send_start_request('go-first')">Go First</button>
     <button class="option" onclick="send_start_request('go-second')">Go Second</button>
 </div>
 
-<div id="resign-option" class="options-container" style="display: none">
-    <button class="option" onclick="send_resign_request()">Resign</button>
+<button id="resign-option" class="option" style="display: none" onclick="send_resign_request()">Resign</button>
+
+<div id="column-labels" style="display: none">
+    <div class="column-label">A</div>
+    <div class="column-label">B</div>
+    <div class="column-label">C</div>
+    <div class="column-label">D</div>
+    <div class="column-label">E</div>
+    <div class="column-label">F</div>
+    <div class="column-label">G</div>
 </div>
 
+<div id="move-log"><pre></pre></div>
+
 <span id="move_marker" class="piece" style="opacity: .375; display: none"></span>
+
 </body>
 
 </html>

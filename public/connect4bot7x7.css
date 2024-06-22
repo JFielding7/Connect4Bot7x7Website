@@ -36,7 +36,15 @@ h1 {
     animation-fill-mode: forwards;
 }
 
-.options-container {
+.option {
+    font-size: 4vh;
+    width: 30vh;
+    height: 8vh;
+    text-align: center;
+    margin: 4vh 1vh 0 1vh;
+}
+
+#start-options {
     width: 70vh;
     height: 12vh;
     position: absolute;
@@ -46,10 +54,33 @@ h1 {
     padding: 0 0 0 0;
 }
 
-.option {
+#resign-option {
+    position: absolute;
+    top: 85vh;
+    left: calc(50% + 37vh);
+}
+
+#move-log {
+    width: 25vh;
+    height: 70vh;
+    position: absolute;
+    top: 15vh;
+    left: calc(50% + 38vh);
+    font-size: 2vh;
+}
+
+#column-labels {
+    width: 70vh;
+    height: 12vh;
+    position: absolute;
+    top: 85vh;
+    left: calc(50% - 35vh);
+    justify-content: space-around;
+}
+
+.column-label {
     font-size: 4vh;
-    width: 30vh;
-    height: 8vh;
     text-align: center;
-    margin: 4vh 1vh 0 1vh;
+    margin-top: 2vh;
+    position: relative;
 }
