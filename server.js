@@ -1,12 +1,62 @@
 import express from "express";
 import {Game, MAX_COL_HEIGHT} from "./game.js";
+import mongoose from "mongoose";
+import path from "path";
 
+const __dirname = path.resolve();
 const server = express();
 const PORT = 7000;
+const URI = `mongodb+srv://${process.env.USERNAME}:${process.env.PASSWORD}@7x7connect4bot.w6f5fji.mongodb.net/connect4stats?retryWrites=true&w=majority&appName=7x7Connect4Bot`;
 
 server.use(express.static("public"));
-
 const curr_games = {};
+
+mongoose.connect(URI).then(async () => {
+    server.listen(PORT, "localhost", err => {
+        if (err) console.error(err);
+        else console.log(`Server running on port ${PORT}`)
+    });
+});
+
+const userSchema = new mongoose.Schema({
+    ip: {
+        type: String,
+        required: true
+    },
+    name: {
+        type: String,
+        // required: true,
+        maxLength: 63,
+        default: "Random Noob"
+    },
+    wins: {
+        type: Number,
+        // required: true,
+        default: 0,
+    },
+    draws: {
+        type: Number,
+        // required: true,
+        default: 0,
+    },
+    losses: {
+        type: Number,
+        // required: true,
+        default: 0,
+    },
+}, { versionKey: false });
+
+const User = mongoose.model("User", userSchema);
+
+server.get("", async (req, res) => {
+    res.sendFile(__dirname + '/public/connect4.html');
+    // const user = await User.create({ip: req.ip, name: "DK", wins: Infinity}, undefined);
+    const user = await User.findOne({ ip: req.ip });
+    if (user == null) {
+        await User.create({ip: req.ip}, undefined);
+    }
+    else console.log("User exists");
+});
 
 server.get("/game-state", (req, res) => {
     const curr_game = curr_games[req.ip];
@@ -67,9 +117,4 @@ server.get("/go-second", (req, res) => {
 server.get("/resign", (req, res) => {
     if (req.ip in curr_games) delete curr_games[req.ip];
     res.status(200).json({resigned: true});
-});
-
-server.listen(PORT, "localhost", err => {
-    if (err) console.error(err);
-    else console.log(`Server running on port ${PORT}`)
 });
