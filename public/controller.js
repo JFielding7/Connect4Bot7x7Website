@@ -94,6 +94,7 @@ function cycle_through_winning_pieces(winning_pieces) {
 }
 
 function show_result(winning_cells) {
+    console.log(winning_cells);
     if (winning_cells == null) return;
 
     const winning_pieces = [];
@@ -133,7 +134,7 @@ function make_move(move, color) {
     animation.setAttribute("type", "text/css");
     animation.innerHTML = `@keyframes drop${move.row}${move.col} { from { top: 5.75vh } to { top: ${vertical_pos} } }`;
     piece.style.animationName = `drop${move.row}${move.col}`;
-    piece.addEventListener("animationend", () => show_result(move.result));
+    piece.addEventListener("animationend", () => show_result(move.winning_cells));
     piece.appendChild(animation);
 
     document.body.appendChild(piece);
