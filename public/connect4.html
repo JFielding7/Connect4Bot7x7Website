@@ -23,8 +23,8 @@
             column.innerHTML = `<div class='col' style='left: ${100 / COLS * c}%;'></div>`;
             column.col_num = c;
 
-            column.onclick = e => send_move_request(c);
-            column.onmouseenter = e => {
+            column.onclick = () => send_move_request(c);
+            column.onmouseenter = () => {
                 column.mouse_on = true;
                 send_hover_request(c);
             }
@@ -60,6 +60,9 @@
     <div class="column-label">F</div>
     <div class="column-label">G</div>
 </div>
+
+<label for="name" id="name-label" class="name-input">Name:</label>
+<input type="text" id="name" class="name-input" value="Random NPC" oninput="send_set_name_request(document.getElementById('name').value)">
 
 <div id="move-log"><pre></pre></div>
 

@@ -7,7 +7,7 @@ let player_color, computer_color;
 let moves_made = 0;
 
 async function send_game_state_request() {
-    const res = await (await fetch(`${URL}game-state`, {method: "GET"})).json();
+    const res = await (await fetch(`${URL}user-info`, {method: "GET"})).json();
     if (res.moves != null) {
         set_up_game_start(res.player_starts);
         const colors = ['red', 'yellow'];
@@ -15,6 +15,7 @@ async function send_game_state_request() {
             make_move(move, colors[i & 1]);
         }
     }
+    document.getElementById("name").value = res.name;
 }
 
 function set_up_game_start(player_starts) {
@@ -94,7 +95,6 @@ function cycle_through_winning_pieces(winning_pieces) {
 }
 
 function show_result(winning_cells) {
-    console.log(winning_cells);
     if (winning_cells == null) return;
 
     const winning_pieces = [];
@@ -147,13 +147,15 @@ async function send_move_request(col) {
         make_move(player_move, player_color);
     }
 
-    const computer_move = await (await fetch(`${URL}computer-move`)).json();
+    const computer_move = await (await fetch(`${URL}computer-move`, {method: "GET"})).json();
     if (computer_move.row != null) {
+        console.log(computer_move);
         make_move(computer_move, computer_color);
         for (const column of document.getElementById("board").getElementsByTagName("div")) {
             if (column.mouse_on) await send_hover_request(parseInt(column.col_num));
         }
     }
+    console.log("done");
 }
 
 async function send_hover_request(col) {
@@ -164,4 +166,8 @@ async function send_hover_request(col) {
         move_marker.style.top = `calc(${75.75 - res.row * 10}vh)`;
         move_marker.style.left = `calc(50% + ${res.col * 10 - 34.25}vh)`;
     }
+}
+
+async function send_set_name_request(name) {
+    await fetch(`${URL}set-name?name=${name}`, {method: "GET"});
 }

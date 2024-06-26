@@ -14,7 +14,9 @@
   },
   "private": true,
   "dependencies": {
+    "async-mutex": "^0.5.0",
     "express": "^4.19.2",
+    "lib": "^5.1.0",
     "mongodb": "^6.7.0",
     "mongoose": "^8.4.3"
   }

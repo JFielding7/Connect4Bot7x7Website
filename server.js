@@ -2,7 +2,7 @@ import express from "express";
 import * as game from "./game.js";
 import mongoose from "mongoose";
 import path from "path";
-import {ZERO} from "./game.js";
+import {Mutex} from 'async-mutex';
 
 const __dirname = path.resolve();
 const server = express();
@@ -11,7 +11,7 @@ const URI = `mongodb+srv://${process.env.USERNAME}:${process.env.PASSWORD}@7x7co
 
 server.use(express.static("public"));
 
-mongoose.connect(URI).then(async () => {
+mongoose.connect(URI).then(() => {
     server.listen(PORT, "localhost", err => {
         if (err) console.error(err);
         else console.log(`Server running on port ${PORT}`)
@@ -49,16 +49,16 @@ server.get("", async (req, res) => {
     res.sendFile(__dirname + '/public/connect4.html');
 });
 
-server.get("/game-state", async (req, res) => {
+server.get("/user-info", async (req, res) => {
     const user = await User.findOne({ip: req.ip});
     if (user == null) {
-        await User.create({ip: req.ip}, undefined);
-        res.status(200).json({player_starts: undefined});
+        const username = (await User.create({ip: req.ip}, undefined)).name;
+        res.status(200).json({player_starts: undefined, name: username});
     }
     else {
         const curr_game = user.curr_game;
-        if (curr_game == null) res.status(200).json({player_starts: undefined});
-        else res.status(200).json({player_starts: curr_game.playerStarts, moves: curr_game.moves});
+        if (curr_game == null) res.status(200).json({player_starts: undefined, name: user.name});
+        else res.status(200).json({player_starts: curr_game.playerStarts, moves: curr_game.moves, name: user.name});
     }
 });
 
@@ -72,33 +72,38 @@ async function make_move(user, move_func, user_ip, col) {
         else user.draws++;
         user.curr_game = null;
     }
-    else {
-        user.markModified("curr_game");
-        // await User.updateOne({ip: user_ip}, {curr_game: user.curr_game});
-    }
+    else user.markModified("curr_game");
     await user.save();
     return move;
 }
 
-server.get("/move", async (req, res) => {
-    let col = parseInt(req.query.col);
-    const user = await User.findOne({ip: req.ip});
+const playerMoveMutex = new Mutex();
 
-    if (isNaN(col) || user == null || user.curr_game == null) {
-        res.status(200).json({row: undefined});
-    }
-    else {
-        res.status(200).json(await make_move(user, game.make_player_move, req.ip, col));
-    }
+server.get("/move", async (req, res) => {
+    await playerMoveMutex.runExclusive(async () => {
+        let col = parseInt(req.query.col);
+        const user = await User.findOne({ip: req.ip});
+
+        if (isNaN(col) || user == null || user.curr_game == null) {
+            res.status(200).json({row: undefined});
+        }
+        else {
+            res.status(200).json(await make_move(user, game.make_player_move, req.ip, col));
+        }
+    });
 });
 
+const comMoveMutex = new Mutex();
+
 server.get("/computer-move", async (req, res) => {
-    const user = await User.findOne({ip: req.ip});
-    console.log(user);
-    if (user != null && user.curr_game != null && user.curr_game.isComputerTurn)
-        res.status(200).json(await make_move(user, game.make_computer_move, req.ip));
-    else
-        res.status(200).json({row: undefined});
+    await comMoveMutex.runExclusive(async () => {
+        const user = await User.findOne({ip: req.ip});
+        if (user != null && user.curr_game != null && user.curr_game.isComputerTurn) {
+            console.log("hello", user.curr_game.movesMade);
+            res.status(200).json(await make_move(user, game.make_computer_move, req.ip));
+        } else
+            res.status(200).json({row: undefined});
+    });
 });
 
 server.get("/hover", async (req, res) => {
@@ -150,4 +155,16 @@ server.get("/resign", async (req, res) => {
         res.status(200).json({resigned: true});
     }
     else res.status(200).json({resigned: false});
+});
+
+server.get("/set-name", async (req, res) => {
+    try {
+        const user = await User.findOne({ip: req.ip});
+        if (user != null) {
+            user.name = req.query.name;
+            await user.save();
+        }
+    }
+    catch (e) {}
+    res.status(200).end();
 });

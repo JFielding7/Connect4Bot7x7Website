@@ -83,6 +83,23 @@ h1 {
 .column-label {
     font-size: 4vh;
     text-align: center;
-    /*margin-top: 0vh;*/
     position: relative;
+}
+
+.name-input {
+    left: calc(50% - 67vh);
+}
+
+#name-label {
+    font-size: 3vh;
+    width: 30vh;
+    position: absolute;
+    top: 15vh;
+}
+
+#name {
+    font-size: 3vh;
+    width: 30vh;
+    position: absolute;
+    top: 19vh;
 }
