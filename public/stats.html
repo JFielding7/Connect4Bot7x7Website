@@ -5,32 +5,88 @@
     <title>7x7 Connect 4 Stats</title>
     <link rel="stylesheet" type="text/css" href="stats.css"/>
     <link rel="shortcut icon" href="connect4.png" type="image/x-icon"/>
+    <script src="stats.js"></script>
 </head>
 
-<body>
-    <h1 style="margin: auto; font-size: 7vh">Stats</h1>
+<body onload="fetch_stats()">
+    <h1 style="margin: auto; font-size: 7vh; text-align: center">Stats</h1>
 
-    <div class="stat-container">
-        <h1 style="margin-top: 5vh">Games</h1>
+    <div id="stats-container" style="display: flex">
+        <div class="stat-container">
+            <h1 class="stat-title">Going First</h1>
+            <h1 id="first-count" class="games-count"></h1>
 
-        <div id="stat-bar">
-            <div id="win-bar"></div>
-            <div id="draw-bar"></div>
-            <div id="loss-bar"></div>
+            <div class="stat-bar">
+                <div id="first-win-bar" class="win-bar"></div>
+                <div id="first-draw-bar" class="draw-bar"></div>
+                <div id="first-loss-bar" class="loss-bar"></div>
+            </div>
+
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-color win-color"></div>
+                    <h2 id="first-wins" class="stat-value"></h2>
+                </div>
+                <div class="stat">
+                    <span class="stat-color draw-color"></span>
+                    <h2 id="first-draws" class="stat-value"></h2>
+                </div>
+                <div class="stat">
+                    <span class="stat-color loss-color"></span>
+                    <h2 id="first-losses" class="stat-value"></h2>
+                </div>
+            </div>
         </div>
 
-        <div id="stats">
-            <div id="wins" class="stat">
-                <div id="win-color" class="stat-color"></div>
-                <h2 class="stat-value">Wins:</h2>
+        <div class="stat-container">
+            <h1 class="stat-title">Going Second</h1>
+            <h1 id="second-count" class="games-count"></h1>
+
+            <div class="stat-bar">
+                <div id="second-win-bar" class="win-bar"></div>
+                <div id="second-draw-bar" class="draw-bar"></div>
+                <div id="second-loss-bar" class="loss-bar"></div>
             </div>
-            <div class="stat">
-                <span id="draw-color" class="stat-color"></span>
-                <h2 class="stat-value">Draws:</h2>
+
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-color win-color"></div>
+                    <h2 id="second-wins" class="stat-value"></h2>
+                </div>
+                <div class="stat">
+                    <span class="stat-color draw-color"></span>
+                    <h2 id="second-draws" class="stat-value"></h2>
+                </div>
+                <div class="stat">
+                    <span class="stat-color loss-color"></span>
+                    <h2 id="second-losses" class="stat-value"></h2>
+                </div>
             </div>
-            <div class="stat">
-                <span id="loss-color" class="stat-color"></span>
-                <h2 class="stat-value">Losses:</h2>
+        </div>
+
+        <div class="stat-container">
+            <h1 class="stat-title">Total</h1>
+            <h1 id="total-count" class="games-count"></h1>
+
+            <div class="stat-bar">
+                <div id="total-win-bar" class="win-bar"></div>
+                <div id="total-draw-bar" class="draw-bar"></div>
+                <div id="total-loss-bar" class="loss-bar"></div>
+            </div>
+
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-color win-color"></div>
+                    <h2 id="total-wins" class="stat-value"></h2>
+                </div>
+                <div class="stat">
+                    <span class="stat-color draw-color"></span>
+                    <h2 id="total-draws" class="stat-value"></h2>
+                </div>
+                <div class="stat">
+                    <span class="stat-color loss-color"></span>
+                    <h2 id="total-losses" class="stat-value"></h2>
+                </div>
             </div>
         </div>
     </div>

@@ -29,19 +29,27 @@ const userSchema = new mongoose.Schema({
         default: "Random Noob"
     },
     stats: {
-        wins: {
+        first_wins: {
             type: Number,
             default: 0
         },
-        losses: {
+        first_losses: {
             type: Number,
             default: 0
         },
-        draws: {
+        first_draws: {
             type: Number,
             default: 0
         },
-        total_moves: {
+        second_wins: {
+            type: Number,
+            default: 0
+        },
+        second_losses: {
+            type: Number,
+            default: 0
+        },
+        second_draws: {
             type: Number,
             default: 0
         }
@@ -64,7 +72,7 @@ server.get("/user-info", async (req, res) => {
         } else {
             const curr_game = user.curr_game;
             if (curr_game == null) res.status(200).json({player_starts: undefined, name: user.name});
-            else res.status(200).json({player_starts: curr_game.playerStarts, moves: curr_game.moves, name: user.name});
+            else res.status(200).json({player_starts: curr_game.player_starts, moves: curr_game.moves, name: user.name});
         }
     }
     catch (e) {
@@ -75,11 +83,20 @@ server.get("/user-info", async (req, res) => {
 async function make_move(user, move_func, user_ip, col) {
     const move = move_func(user.curr_game, col);
     if (move.winning_cells != null) {
-        if (move.winning_cells.length) {
-            user.stats.wins += user.curr_game.isComputerTurn;
-            user.stats.losses += !user.curr_game.isComputerTurn;
+        if (user.curr_game.player_starts) {
+            if (move.winning_cells.length) {
+                user.stats.first_wins += user.curr_game.is_com_turn;
+                user.stats.first_losses += !user.curr_game.is_com_turn;
+            }
+            else user.stats.first_draws++;
         }
-        else user.stats.draws++;
+        else {
+            if (move.winning_cells.length) {
+                user.stats.second_wins += user.curr_game.is_com_turn;
+                user.stats.second_losses += !user.curr_game.is_com_turn;
+            }
+            else user.stats.second_draws++;
+        }
         user.curr_game = null;
     }
     else user.markModified("curr_game");
@@ -113,7 +130,7 @@ server.get("/computer-move", async (req, res) => {
     try {
         await comMoveMutex.runExclusive(async () => {
             const user = await User.findOne({ip: req.ip});
-            if (user != null && user.curr_game != null && user.curr_game.isComputerTurn) {
+            if (user != null && user.curr_game != null && user.curr_game.is_com_turn) {
                 res.status(200).json(await make_move(user, game.make_computer_move, req.ip));
             }
             else {
@@ -131,7 +148,7 @@ server.get("/hover", async (req, res) => {
         const col = parseInt(req.query.col);
         const curr_game = (await User.findOne({ip: req.ip})).curr_game;
 
-        if (isNaN(col) || curr_game == null || curr_game.isComputerTurn)
+        if (isNaN(col) || curr_game == null || curr_game.is_com_turn)
             res.status(200).json({row: undefined, col: undefined});
         else {
             const row = game.col_height(curr_game, col);

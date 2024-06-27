@@ -1,34 +1,39 @@
 .stat-container {
     text-align: center;
     margin: auto;
+    width: 30%;
 }
 
-#stat-bar {
-    width: 50%;
+.games-count {
+    margin-top: auto;
+}
+
+.stat-bar {
+    width: 100%;
     height: 5vh;
     display: flex;
     margin: 5vh auto auto;
 }
 
-#win-bar {
+.win-bar {
     background: lightgreen;
     width: 100%;
     height: 5vh;
 }
 
-#draw-bar {
+.draw-bar {
     background: blue;
     width: 50%;
     height: 5vh;
 }
 
-#loss-bar {
+.loss-bar {
     background: red;
     width: 50%;
     height: 5vh;
 }
 
-#stats {
+.stats {
     width: 100%;
     margin-top: 5vh;
 }
@@ -39,28 +44,26 @@
     height: 5vh;
 }
 
-#wins {
-}
-
 .stat-color {
     width: 3vh;
     height: 3vh;
     border-radius: 50%;
-    margin: auto 4px auto 25%;
+    margin: auto 4px auto;
+}
+
+.win-color {
+    background: lightgreen;
+}
+
+.draw-color {
+    background: blue;
+}
+
+.loss-color {
+    background: red;
 }
 
 .stat-value {
     margin: auto auto auto 4px;
-}
-
-#win-color {
-    background: lightgreen;
-}
-
-#draw-color {
-    background: blue;
-}
-
-#loss-color {
-    background: red;
+    font-size: 3vh;
 }
