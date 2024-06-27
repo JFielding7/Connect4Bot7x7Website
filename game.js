@@ -15,7 +15,6 @@ export function Game(comTurn) {
     this.heightMap = BigInt("0b00000001000000010000000100000001000000010000000100000001");
     this.isComputerTurn = comTurn;
     this.playerStarts = !comTurn;
-    this.movesMade = 0;
     this.moves = [];
     make_serializable(this);
 }
@@ -38,21 +37,20 @@ export function find_win(pieces) {
 export function game_result(game) {
     let win = game.isComputerTurn ? find_win(game.playerPieces) : find_win(game.computerPieces);
     if (win != null && win.length) return win;
-    return game.movesMade === MAX_MOVES ? [] : undefined;
+    return game.moves.length === MAX_MOVES ? [] : undefined;
 }
 
 export function make_computer_move(game) {
     game.heightMap = BigInt(game.heightMap);
     game.computerPieces = BigInt(game.computerPieces);
 
-    const col = parseInt(execSync(`./c4 ${game.computerPieces} ${game.playerPieces} ${game.heightMap} ${game.movesMade}`, {encoding: "utf-8"}));
+    const col = parseInt(execSync(`./c4 ${game.computerPieces} ${game.playerPieces} ${game.heightMap} ${game.moves.length}`, {encoding: "utf-8"}));
     const row = col_height(game, col);
     game.moves.push({row: row, col: col});
     
     const move = game.heightMap & (COL_MASK << (BigInt(col) << BigInt(3)));
     game.computerPieces |= move;
     game.heightMap += move;
-    game.movesMade++;
     game.isComputerTurn = false;
     return {row: row, col: col, winning_cells: game_result(game)};
 }
@@ -72,7 +70,6 @@ export function make_player_move(game, col) {
     const row_bit = game.heightMap & (COL_MASK << (BigInt(col) << BigInt(3)));
     game.playerPieces |= row_bit;
     game.heightMap += row_bit;
-    game.movesMade++;
     game.isComputerTurn = true;
     return {row: row, col: col, winning_cells: game_result(game)};
 }

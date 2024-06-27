@@ -28,17 +28,23 @@ const userSchema = new mongoose.Schema({
         maxLength: 63,
         default: "Random Noob"
     },
-    wins: {
-        type: Number,
-        default: 0,
-    },
-    draws: {
-        type: Number,
-        default: 0,
-    },
-    losses: {
-        type: Number,
-        default: 0,
+    stats: {
+        wins: {
+            type: Number,
+            default: 0
+        },
+        losses: {
+            type: Number,
+            default: 0
+        },
+        draws: {
+            type: Number,
+            default: 0
+        },
+        total_moves: {
+            type: Number,
+            default: 0
+        }
     },
     curr_game: Object
 }, { versionKey: false });
@@ -50,15 +56,19 @@ server.get("", async (req, res) => {
 });
 
 server.get("/user-info", async (req, res) => {
-    const user = await User.findOne({ip: req.ip});
-    if (user == null) {
-        const username = (await User.create({ip: req.ip}, undefined)).name;
-        res.status(200).json({player_starts: undefined, name: username});
+    try {
+        const user = await User.findOne({ip: req.ip});
+        if (user == null) {
+            const username = (await User.create({ip: req.ip})).name;
+            res.status(200).json({player_starts: undefined, name: username});
+        } else {
+            const curr_game = user.curr_game;
+            if (curr_game == null) res.status(200).json({player_starts: undefined, name: user.name});
+            else res.status(200).json({player_starts: curr_game.playerStarts, moves: curr_game.moves, name: user.name});
+        }
     }
-    else {
-        const curr_game = user.curr_game;
-        if (curr_game == null) res.status(200).json({player_starts: undefined, name: user.name});
-        else res.status(200).json({player_starts: curr_game.playerStarts, moves: curr_game.moves, name: user.name});
+    catch (e) {
+        console.log(e);
     }
 });
 
@@ -66,10 +76,10 @@ async function make_move(user, move_func, user_ip, col) {
     const move = move_func(user.curr_game, col);
     if (move.winning_cells != null) {
         if (move.winning_cells.length) {
-            user.wins += user.curr_game.isComputerTurn;
-            user.losses += !user.curr_game.isComputerTurn;
+            user.stats.wins += user.curr_game.isComputerTurn;
+            user.stats.losses += !user.curr_game.isComputerTurn;
         }
-        else user.draws++;
+        else user.stats.draws++;
         user.curr_game = null;
     }
     else user.markModified("curr_game");
@@ -80,30 +90,40 @@ async function make_move(user, move_func, user_ip, col) {
 const playerMoveMutex = new Mutex();
 
 server.get("/move", async (req, res) => {
-    await playerMoveMutex.runExclusive(async () => {
-        let col = parseInt(req.query.col);
-        const user = await User.findOne({ip: req.ip});
+    try {
+        await playerMoveMutex.runExclusive(async () => {
+            let col = parseInt(req.query.col);
+            const user = await User.findOne({ip: req.ip});
 
-        if (isNaN(col) || user == null || user.curr_game == null) {
-            res.status(200).json({row: undefined});
-        }
-        else {
-            res.status(200).json(await make_move(user, game.make_player_move, req.ip, col));
-        }
-    });
+            if (isNaN(col) || user == null || user.curr_game == null) {
+                res.status(200).json({row: undefined});
+            } else {
+                res.status(200).json(await make_move(user, game.make_player_move, req.ip, col));
+            }
+        });
+    }
+    catch (e) {
+        console.log(e);
+    }
 });
 
 const comMoveMutex = new Mutex();
 
 server.get("/computer-move", async (req, res) => {
-    await comMoveMutex.runExclusive(async () => {
-        const user = await User.findOne({ip: req.ip});
-        if (user != null && user.curr_game != null && user.curr_game.isComputerTurn) {
-            console.log("hello", user.curr_game.movesMade);
-            res.status(200).json(await make_move(user, game.make_computer_move, req.ip));
-        } else
-            res.status(200).json({row: undefined});
-    });
+    try {
+        await comMoveMutex.runExclusive(async () => {
+            const user = await User.findOne({ip: req.ip});
+            if (user != null && user.curr_game != null && user.curr_game.isComputerTurn) {
+                res.status(200).json(await make_move(user, game.make_computer_move, req.ip));
+            }
+            else {
+                res.status(200).json({row: undefined});
+            }
+        });
+    }
+    catch (e) {
+        console.log(e);
+    }
 });
 
 server.get("/hover", async (req, res) => {
@@ -126,35 +146,47 @@ server.get("/hover", async (req, res) => {
 });
 
 server.get("/go-first", async (req, res) => {
-    const user = await User.findOne({ip: req.ip});
-    if (user != null && user.curr_game == null) {
-        user.curr_game = new game.Game(false);
-        await user.save();
-        res.status(200).json({started: true});
+    try {
+        const user = await User.findOne({ip: req.ip});
+        if (user != null && user.curr_game == null) {
+            user.curr_game = new game.Game(false);
+            await user.save();
+            res.status(200).json({started: true});
+        } else res.status(200).json({started: false});
     }
-    else res.status(200).json({started: false});
+    catch (e) {
+        console.log(e);
+    }
 });
 
 server.get("/go-second", async (req, res) => {
-    const user = await User.findOne({ip: req.ip});
-    if (user != null && user.curr_game == null) {
-        user.curr_game = new game.Game(true);
-        const com_move = await make_move(user, game.make_computer_move, req.ip);
-        await user.save();
-        res.status(200).json({started: true, row: com_move.row, col: com_move.col});
+    try {
+        const user = await User.findOne({ip: req.ip});
+        if (user != null && user.curr_game == null) {
+            user.curr_game = new game.Game(true);
+            const com_move = await make_move(user, game.make_computer_move, req.ip);
+            await user.save();
+            res.status(200).json({started: true, row: com_move.row, col: com_move.col});
+        } else res.status(200).json({started: false});
     }
-    else res.status(200).json({started: false});
+    catch (e) {
+        console.log(e);
+    }
 });
 
 server.get("/resign", async (req, res) => {
-    const user = await User.findOne({ip: req.ip});
-    if (user != null && user.curr_game != null) {
-        user.losses++;
-        user.curr_game = null;
-        await user.save();
-        res.status(200).json({resigned: true});
+    try {
+        const user = await User.findOne({ip: req.ip});
+        if (user != null && user.curr_game != null) {
+            user.losses++;
+            user.curr_game = null;
+            await user.save();
+            res.status(200).json({resigned: true});
+        } else res.status(200).json({resigned: false});
     }
-    else res.status(200).json({resigned: false});
+    catch (e) {
+        console.log(e);
+    }
 });
 
 server.get("/set-name", async (req, res) => {
@@ -164,7 +196,24 @@ server.get("/set-name", async (req, res) => {
             user.name = req.query.name;
             await user.save();
         }
+        res.status(200).end();
     }
-    catch (e) {}
-    res.status(200).end();
+    catch (e) {
+        console.log(e);
+    }
+});
+
+server.get("/stats", (req, res) => {
+    res.sendFile(__dirname + '/public/stats.html');
+})
+
+server.get("/fetch-stats", async (req, res) => {
+    try {
+        let user = await User.findOne({ip: req.ip});
+        if (user == null) user = await User.create({ip: req.ip});
+        res.status(200).json(user.stats);
+    }
+    catch (e) {
+        console.log(e);
+    }
 });

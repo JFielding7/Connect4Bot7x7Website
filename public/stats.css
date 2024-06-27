@@ -1,0 +1,66 @@
+.stat-container {
+    text-align: center;
+    margin: auto;
+}
+
+#stat-bar {
+    width: 50%;
+    height: 5vh;
+    display: flex;
+    margin: 5vh auto auto;
+}
+
+#win-bar {
+    background: lightgreen;
+    width: 100%;
+    height: 5vh;
+}
+
+#draw-bar {
+    background: blue;
+    width: 50%;
+    height: 5vh;
+}
+
+#loss-bar {
+    background: red;
+    width: 50%;
+    height: 5vh;
+}
+
+#stats {
+    width: 100%;
+    margin-top: 5vh;
+}
+
+.stat {
+    display: flex;
+    width: 100%;
+    height: 5vh;
+}
+
+#wins {
+}
+
+.stat-color {
+    width: 3vh;
+    height: 3vh;
+    border-radius: 50%;
+    margin: auto 4px auto 25%;
+}
+
+.stat-value {
+    margin: auto auto auto 4px;
+}
+
+#win-color {
+    background: lightgreen;
+}
+
+#draw-color {
+    background: blue;
+}
+
+#loss-color {
+    background: red;
+}
