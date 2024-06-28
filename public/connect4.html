@@ -30,7 +30,7 @@
             }
             column.onmouseleave = () => {
                 column.mouse_on = false;
-                document.getElementById("move_marker").style.display = "none";
+                document.getElementById("move-marker").style.display = "none";
             }
 
             board.appendChild(column);
@@ -61,8 +61,10 @@
     <div class="column-label">G</div>
 </div>
 
-<label for="name" id="name-label" class="name-input">Name:</label>
-<input type="text" id="name" class="name-input" value="Random NPC" oninput="send_set_name_request(document.getElementById('name').value)">
+<label for="name" id="name-label" class="other-options">Your Name:</label>
+<input type="text" id="name" class="other-options" value="NPC" oninput="send_set_name_request(document.getElementById('name').value)">
+
+<button id="stats-button" class="other-options" onclick="window.location = 'http://localhost:7000/stats'">View Stats</button>
 
 <div id="move-log"><pre></pre></div>
 

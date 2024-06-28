@@ -25,7 +25,7 @@ function set_up_game_start(player_starts) {
         player_color = "red";
         computer_color = "yellow";
     }
-    document.getElementById("move_marker").style.background = player_color;
+    document.getElementById("move-marker").style.background = player_color;
     document.getElementById("start-options").style.display = "none";
     document.getElementById("resign-option").style.display = "inline";
     document.getElementById("move-log").children[0].innerText = "0. Starting Position";
@@ -143,25 +143,23 @@ function make_move(move, color) {
 async function send_move_request(col) {
     const player_move = await (await fetch(`${URL}move?col=${col}`, {method: "GET"})).json();
     if (player_move.row != null) {
-        document.getElementById("move_marker").style.display = "none";
+        document.getElementById("move-marker").style.display = "none";
         make_move(player_move, player_color);
     }
 
     const computer_move = await (await fetch(`${URL}computer-move`, {method: "GET"})).json();
     if (computer_move.row != null) {
-        console.log(computer_move);
         make_move(computer_move, computer_color);
         for (const column of document.getElementById("board").getElementsByTagName("div")) {
             if (column.mouse_on) await send_hover_request(parseInt(column.col_num));
         }
     }
-    console.log("done");
 }
 
 async function send_hover_request(col) {
     const res = await (await fetch(`${URL}hover?col=${col}`, {method: "GET"})).json();
     if (res.row != null) {
-        const move_marker = document.getElementById("move_marker");
+        const move_marker = document.getElementById("move-marker");
         move_marker.style.display = "inline";
         move_marker.style.top = `calc(${75.75 - res.row * 10}vh)`;
         move_marker.style.left = `calc(50% + ${res.col * 10 - 34.25}vh)`;

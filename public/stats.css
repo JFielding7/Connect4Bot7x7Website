@@ -67,3 +67,12 @@
     margin: auto auto auto 4px;
     font-size: 3vh;
 }
+
+button {
+    width: 25%;
+    height: 7vh;
+    font-size: 3vh;
+    margin: 12vh auto;
+    display: block;
+}
+

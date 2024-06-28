@@ -86,20 +86,23 @@ h1 {
     position: relative;
 }
 
-.name-input {
+.other-options {
+    width: 30vh;
+    position: absolute;
     left: calc(50% - 67vh);
+    font-size: 3vh;
 }
 
 #name-label {
-    font-size: 3vh;
-    width: 30vh;
-    position: absolute;
-    top: 15vh;
+    top: 40vh;
 }
 
 #name {
-    font-size: 3vh;
-    width: 30vh;
-    position: absolute;
-    top: 19vh;
+    top: 44vh;
+}
+
+#stats-button {
+    height: 5vh;
+    top: 48vh;
+    margin-top: 3vh;
 }

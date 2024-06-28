@@ -80,23 +80,27 @@ server.get("/user-info", async (req, res) => {
     }
 });
 
+function update_stats(user, is_winner) {
+    if (user.curr_game.player_starts) {
+        if (is_winner) {
+            user.stats.first_wins += user.curr_game.is_com_turn;
+            user.stats.first_losses += !user.curr_game.is_com_turn;
+        }
+        else user.stats.first_draws++;
+    }
+    else {
+        if (is_winner) {
+            user.stats.second_wins += user.curr_game.is_com_turn;
+            user.stats.second_losses += !user.curr_game.is_com_turn;
+        }
+        else user.stats.second_draws++;
+    }
+}
+
 async function make_move(user, move_func, user_ip, col) {
     const move = move_func(user.curr_game, col);
     if (move.winning_cells != null) {
-        if (user.curr_game.player_starts) {
-            if (move.winning_cells.length) {
-                user.stats.first_wins += user.curr_game.is_com_turn;
-                user.stats.first_losses += !user.curr_game.is_com_turn;
-            }
-            else user.stats.first_draws++;
-        }
-        else {
-            if (move.winning_cells.length) {
-                user.stats.second_wins += user.curr_game.is_com_turn;
-                user.stats.second_losses += !user.curr_game.is_com_turn;
-            }
-            else user.stats.second_draws++;
-        }
+        update_stats(user, move.winning_cells.length);
         user.curr_game = null;
     }
     else user.markModified("curr_game");
@@ -104,11 +108,11 @@ async function make_move(user, move_func, user_ip, col) {
     return move;
 }
 
-const playerMoveMutex = new Mutex();
+const move_mutex = new Mutex();
 
 server.get("/move", async (req, res) => {
     try {
-        await playerMoveMutex.runExclusive(async () => {
+        await move_mutex.runExclusive(async () => {
             let col = parseInt(req.query.col);
             const user = await User.findOne({ip: req.ip});
 
@@ -124,11 +128,9 @@ server.get("/move", async (req, res) => {
     }
 });
 
-const comMoveMutex = new Mutex();
-
 server.get("/computer-move", async (req, res) => {
     try {
-        await comMoveMutex.runExclusive(async () => {
+        await move_mutex.runExclusive(async () => {
             const user = await User.findOne({ip: req.ip});
             if (user != null && user.curr_game != null && user.curr_game.is_com_turn) {
                 res.status(200).json(await make_move(user, game.make_computer_move, req.ip));
@@ -195,11 +197,13 @@ server.get("/resign", async (req, res) => {
     try {
         const user = await User.findOne({ip: req.ip});
         if (user != null && user.curr_game != null) {
-            user.losses++;
+            if (user.curr_game.player_starts) user.stats.first_losses++;
+            else user.stats.second_losses++;
             user.curr_game = null;
             await user.save();
             res.status(200).json({resigned: true});
-        } else res.status(200).json({resigned: false});
+        }
+        else res.status(200).json({resigned: false});
     }
     catch (e) {
         console.log(e);
