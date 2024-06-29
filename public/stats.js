@@ -1,4 +1,4 @@
-const URL = "http://localhost:7000/";
+const URL = "http://129.80.142.233/";
 
 async function fetch_stats() {
     const stats = await (await fetch(`${URL}fetch-stats`)).json();

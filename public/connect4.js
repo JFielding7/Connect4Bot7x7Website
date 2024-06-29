@@ -1,4 +1,4 @@
-const URL = "http://localhost:7000/";
+const URL = "http://129.80.142.233/";
 const ROWS = 7, COLS = 7;
 const FADED = ".25";
 const A_CODE = 65;
