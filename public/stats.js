@@ -14,20 +14,26 @@ async function fetch_stats() {
         document.getElementById(s + "-count").textContent = `Games: ${games}`;
 
         const wins = eval(`stats.${s}_wins`);
-        const win_percent = wins / games * 100;
-        document.getElementById(s + "-wins").textContent = `Wins: ${wins} (${win_percent.toFixed(2)}%)`;
-        document.getElementById(s + "-win-bar").style.width = `${win_percent}%`
-
         const draws = eval(`stats.${s}_draws`);
-        const draw_percent = draws / games * 100;
-        document.getElementById(s + "-draws").textContent = `Draws: ${draws} (${draw_percent.toFixed(2)}%)`;
-        document.getElementById(s + "-draw-bar").style.width = `${draw_percent}%`
-
         const losses = eval(`stats.${s}_losses`);
-        const loss_percent = losses / games * 100;
-        document.getElementById(s + "-losses").textContent = `Losses: ${losses} (${loss_percent.toFixed(2)}%)`;
-        document.getElementById(s + "-loss-bar").style.width = `${loss_percent}%`
+
+        if (games) {
+            const win_percent = wins / games * 100;
+            document.getElementById(s + "-wins").textContent = `Wins: ${wins} (${win_percent.toFixed(2)}%)`;
+            document.getElementById(s + "-win-bar").style.width = `${win_percent}%`
+
+            const draw_percent = draws / games * 100;
+            document.getElementById(s + "-draws").textContent = `Draws: ${draws} (${draw_percent.toFixed(2)}%)`;
+            document.getElementById(s + "-draw-bar").style.width = `${draw_percent}%`
+
+            const loss_percent = losses / games * 100;
+            document.getElementById(s + "-losses").textContent = `Losses: ${losses} (${loss_percent.toFixed(2)}%)`;
+            document.getElementById(s + "-loss-bar").style.width = `${loss_percent}%`
+        }
+        else {
+            document.getElementById(s + "-wins").textContent = `Wins: ${wins}`;
+            document.getElementById(s + "-draws").textContent = `Draws: ${draws}`;
+            document.getElementById(s + "-losses").textContent = `Losses: ${losses}`;
+        }
     }
-
-
 }
