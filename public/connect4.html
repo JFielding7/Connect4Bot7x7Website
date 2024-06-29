@@ -62,7 +62,7 @@
 </div>
 
 <label for="name" id="name-label" class="other-options">Your Name:</label>
-<input type="text" id="name" class="other-options" value="NPC" oninput="send_set_name_request(document.getElementById('name').value)">
+<input type="text" id="name" class="other-options" oninput="send_set_name_request(document.getElementById('name').value)"/>
 
 <button id="stats-button" class="other-options" onclick="window.location = 'http://localhost:7000/stats'">View Stats</button>
 

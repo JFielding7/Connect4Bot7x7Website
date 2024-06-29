@@ -12,7 +12,7 @@ const URI = `mongodb+srv://${process.env.USERNAME}:${process.env.PASSWORD}@7x7co
 server.use(express.static("public"));
 
 mongoose.connect(URI).then(() => {
-    server.listen(PORT, "localhost", err => {
+    server.listen(PORT, "0.0.0.0", err => {
         if (err) console.error(err);
         else console.log(`Server running on port ${PORT}`)
     });
@@ -26,7 +26,7 @@ const userSchema = new mongoose.Schema({
     name: {
         type: String,
         maxLength: 63,
-        default: "Random Noob"
+        default: "NPC"
     },
     stats: {
         first_wins: {
@@ -65,9 +65,10 @@ server.get("", async (req, res) => {
 
 server.get("/user-info", async (req, res) => {
     try {
-        const user = await User.findOne({ip: req.ip});
+        const curr_ip = req.header('x-forwarded-for');
+        const user = await User.findOne({ip: curr_ip});
         if (user == null) {
-            const username = (await User.create({ip: req.ip})).name;
+            const username = (await User.create({ip: curr_ip})).name;
             res.status(200).json({player_starts: undefined, name: username});
         } else {
             const curr_game = user.curr_game;
@@ -112,14 +113,15 @@ const move_mutex = new Mutex();
 
 server.get("/move", async (req, res) => {
     try {
+        const curr_ip = req.header('x-forwarded-for');
         await move_mutex.runExclusive(async () => {
             let col = parseInt(req.query.col);
-            const user = await User.findOne({ip: req.ip});
+            const user = await User.findOne({ip: curr_ip});
 
             if (isNaN(col) || user == null || user.curr_game == null) {
                 res.status(200).json({row: undefined});
             } else {
-                res.status(200).json(await make_move(user, game.make_player_move, req.ip, col));
+                res.status(200).json(await make_move(user, game.make_player_move, curr_ip, col));
             }
         });
     }
@@ -130,10 +132,11 @@ server.get("/move", async (req, res) => {
 
 server.get("/computer-move", async (req, res) => {
     try {
+        const curr_ip = req.header('x-forwarded-for');
         await move_mutex.runExclusive(async () => {
-            const user = await User.findOne({ip: req.ip});
+            const user = await User.findOne({ip: curr_ip});
             if (user != null && user.curr_game != null && user.curr_game.is_com_turn) {
-                res.status(200).json(await make_move(user, game.make_computer_move, req.ip));
+                res.status(200).json(await make_move(user, game.make_computer_move, curr_ip));
             }
             else {
                 res.status(200).json({row: undefined});
@@ -147,8 +150,9 @@ server.get("/computer-move", async (req, res) => {
 
 server.get("/hover", async (req, res) => {
     try {
+        const curr_ip = req.header('x-forwarded-for');
         const col = parseInt(req.query.col);
-        const curr_game = (await User.findOne({ip: req.ip})).curr_game;
+        const curr_game = (await User.findOne({ip: curr_ip})).curr_game;
 
         if (isNaN(col) || curr_game == null || curr_game.is_com_turn)
             res.status(200).json({row: undefined, col: undefined});
@@ -166,7 +170,8 @@ server.get("/hover", async (req, res) => {
 
 server.get("/go-first", async (req, res) => {
     try {
-        const user = await User.findOne({ip: req.ip});
+        const curr_ip = req.header('x-forwarded-for');
+        const user = await User.findOne({ip: curr_ip});
         if (user != null && user.curr_game == null) {
             user.curr_game = new game.Game(false);
             await user.save();
@@ -180,10 +185,11 @@ server.get("/go-first", async (req, res) => {
 
 server.get("/go-second", async (req, res) => {
     try {
-        const user = await User.findOne({ip: req.ip});
+        const curr_ip = req.header('x-forwarded-for');
+        const user = await User.findOne({ip: curr_ip});
         if (user != null && user.curr_game == null) {
             user.curr_game = new game.Game(true);
-            const com_move = await make_move(user, game.make_computer_move, req.ip);
+            const com_move = await make_move(user, game.make_computer_move, curr_ip);
             await user.save();
             res.status(200).json({started: true, row: com_move.row, col: com_move.col});
         } else res.status(200).json({started: false});
@@ -195,7 +201,8 @@ server.get("/go-second", async (req, res) => {
 
 server.get("/resign", async (req, res) => {
     try {
-        const user = await User.findOne({ip: req.ip});
+        const curr_ip = req.header('x-forwarded-for');
+        const user = await User.findOne({ip: curr_ip});
         if (user != null && user.curr_game != null) {
             if (user.curr_game.player_starts) user.stats.first_losses++;
             else user.stats.second_losses++;
@@ -212,7 +219,8 @@ server.get("/resign", async (req, res) => {
 
 server.get("/set-name", async (req, res) => {
     try {
-        const user = await User.findOne({ip: req.ip});
+        const curr_ip = req.header('x-forwarded-for');
+        const user = await User.findOne({ip: curr_ip});
         if (user != null) {
             user.name = req.query.name;
             await user.save();
@@ -230,8 +238,9 @@ server.get("/stats", (req, res) => {
 
 server.get("/fetch-stats", async (req, res) => {
     try {
-        let user = await User.findOne({ip: req.ip});
-        if (user == null) user = await User.create({ip: req.ip});
+        const curr_ip = req.header('x-forwarded-for');
+        let user = await User.findOne({ip: curr_ip});
+        if (user == null) user = await User.create({ip: curr_ip});
         res.status(200).json(user.stats);
     }
     catch (e) {
