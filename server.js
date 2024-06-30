@@ -15,9 +15,8 @@ server.use(express.static("public"));
 
 mongoose.connect(URI).then(() => {
     const options = {
-        key: fs.readFileSync("/home/ubuntu/ssl/key.pem"),
-        ca: fs.readFileSync("/home/ubuntu/ssl/inter_cert.pem"),
-        cert: fs.readFileSync("/home/ubuntu/ssl/cert.pem")
+        key: fs.readFileSync("/etc/letsencrypt/live/7x7connect4bot.com/privkey.pem"),
+        cert: fs.readFileSync("/etc/letsencrypt/live/7x7connect4bot.com/fullchain.pem"),
     };
 
     https.createServer(options, server).listen(PORT, "0.0.0.0", err => {

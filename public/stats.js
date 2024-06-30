@@ -1,4 +1,4 @@
-const URL = "http://129.80.142.233/";
+const URL = "https://7x7connect4bot/";
 
 async function fetch_stats() {
     const stats = await (await fetch(`${URL}fetch-stats`)).json();
