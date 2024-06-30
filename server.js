@@ -1,4 +1,6 @@
 import express from "express";
+import fs from "fs";
+import https from "https";
 import * as game from "./game.js";
 import mongoose from "mongoose";
 import path from "path";
@@ -12,7 +14,12 @@ const URI = `mongodb+srv://${process.env.USERNAME}:${process.env.PASSWORD}@7x7co
 server.use(express.static("public"));
 
 mongoose.connect(URI).then(() => {
-    server.listen(PORT, "0.0.0.0", err => {
+    const options = {
+        key: fs.readFileSync("/home/ubuntu/ssl/key.pem"),
+        cert: fs.readFileSync("/home/ubuntu/ssl/cert.pem")
+    };
+
+    https.createServer(options, server).listen(PORT, "0.0.0.0", err => {
         if (err) console.error(err);
         else console.log(`Server running on port ${PORT}`)
     });
