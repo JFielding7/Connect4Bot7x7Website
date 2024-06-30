@@ -16,6 +16,7 @@ server.use(express.static("public"));
 mongoose.connect(URI).then(() => {
     const options = {
         key: fs.readFileSync("/home/ubuntu/ssl/key.pem"),
+        ca: fs.readFileSync("/home/ubuntu/ssl/inter_cert.pem"),
         cert: fs.readFileSync("/home/ubuntu/ssl/cert.pem")
     };
 
