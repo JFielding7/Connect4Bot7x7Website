@@ -1,4 +1,4 @@
-const URL = "https://7x7connect4bot/";
+const URL = "https://7x7connect4bot.com/";
 const ROWS = 7, COLS = 7;
 const FADED = ".25";
 const A_CODE = 65;

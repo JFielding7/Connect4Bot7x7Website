@@ -1,4 +1,4 @@
-const URL = "https://7x7connect4bot/";
+const URL = "https://7x7connect4bot.com/";
 
 async function fetch_stats() {
     const stats = await (await fetch(`${URL}fetch-stats`)).json();
