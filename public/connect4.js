@@ -19,11 +19,11 @@ async function send_game_state_request() {
 }
 
 function set_up_game_start(player_starts) {
-    player_color = "yellow";
+    player_color = "#fce000";
     computer_color = "red";
     if (player_starts) {
         player_color = "red";
-        computer_color = "yellow";
+        computer_color = "#fce000";
     }
     document.getElementById("move-marker").style.background = player_color;
     document.getElementById("start-options").style.display = "none";
