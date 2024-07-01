@@ -1,6 +1,4 @@
 import express from "express";
-import fs from "fs";
-import https from "https";
 import * as game from "./game.js";
 import mongoose from "mongoose";
 import path from "path";
@@ -14,12 +12,7 @@ const URI = `mongodb+srv://${process.env.USERNAME}:${process.env.PASSWORD}@7x7co
 server.use(express.static("public"));
 
 mongoose.connect(URI).then(() => {
-    const options = {
-        key: fs.readFileSync("/etc/letsencrypt/live/7x7connect4bot.com/privkey.pem"),
-        cert: fs.readFileSync("/etc/letsencrypt/live/7x7connect4bot.com/fullchain.pem"),
-    };
-
-    https.createServer(options, server).listen(PORT, "0.0.0.0", err => {
+    server.listen(PORT, "0.0.0.0", err => {
         if (err) console.error(err);
         else console.log(`Server running on port ${PORT}`)
     });
@@ -77,7 +70,8 @@ server.get("/user-info", async (req, res) => {
         if (user == null) {
             const username = (await User.create({ip: curr_ip})).name;
             res.status(200).json({player_starts: undefined, name: username});
-        } else {
+        }
+        else {
             const curr_game = user.curr_game;
             if (curr_game == null) res.status(200).json({player_starts: undefined, name: user.name});
             else res.status(200).json({player_starts: curr_game.player_starts, moves: curr_game.moves, name: user.name});
